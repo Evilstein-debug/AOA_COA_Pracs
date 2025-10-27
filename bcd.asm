@@ -1,7 +1,7 @@
 DATA SEGMENT
-    msg1 db 0dh,0ah "Enter first BCD number: $"
-    msg2 db 0dh,0ah "Enter second BCD number :$"
-    msg3 db 0dh,0ah "BCD Addition result is: $"
+    msg1 db 0dh,0ah, "Enter first BCD number: $"
+    msg2 db 0dh,0ah, "Enter second BCD number :$"
+    msg3 db 0dh,0ah, "BCD Addition result is: $"
 DATA ENDS
 
 CODE SEGMENT
@@ -47,7 +47,36 @@ CODE SEGMENT
     mov ah,09h
     int 21h
 
-    
+    mov al,bh
+    add al,bl
+    daa
+    mov bh,al       ;final bcd addition answer in bh
+    jnc down        ;if CF=0 go to down label
+    mov dl,'1'
+    mov ah,02h      ;prints the char in DL
+    int 21h
+
+down:
+    mov cl,04h
+    mov al,bh
+    and al,0F0h     ;mask out lower nibble and keep only upper nibble (tens digit)
+    ror al,cl
+    add al,30h      ;convert numeric value to ascii
+    mov dl,al
+    mov ah,02h      ;print ascii tens digit
+    int 21h
+
+    mov al,bh
+    and al,0Fh      ;mask upper nibble, lower nibble = ones digit
+    add al,30h
+    mov dl,al
+    mov ah,02h
+    int 21h
+
+    mov ah,4ch
+    int 21h
+CODE ENDS
+END START
 
     
 
