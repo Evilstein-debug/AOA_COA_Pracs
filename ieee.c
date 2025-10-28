@@ -1,80 +1,73 @@
 #include <stdio.h>
-#include <math.h>
-void printBinaryInteger(int n) {
-    if (n == 0) {
-        printf("0");
-        return;
+
+int exponent[8];
+int mantissa[23];
+
+int bit_size(int num){
+    int size=0;
+    while (num>0)
+    {
+        num /= 2;
+        size++;
     }
-    int bits[32], i = 0;
-    while (n > 0) {
-        bits[i++] = n % 2;
-        n /= 2;
-    }
-    for (int j = i - 1; j >= 0; j--) printf("%d", bits[j]);
+    return size;
 }
-void printBinaryFraction(float frac, int precision) {
-    for (int i = 0; i < precision; i++) {
-        frac *= 2;
-        if (frac >= 1.0) {
-            printf("1");
-            frac -= 1.0;
-        } else {
-            printf("0");
-        }
+
+void convert_int_to_binary(int num, int bin[], int size){
+    for(int i=size-1; i>=0; i--){
+        bin[i] = num%2;
+        num /= 2;
     }
 }
-int main() {
-    float num;
-    printf("Tejas Pathak\nC23\n2403119\n");
-    printf("Enter a floating-point number: ");
-    scanf("%f", &num);
-    int sign = (num < 0) ? 1 : 0;
-    float absNum = fabs(num);
-    int intPart = (int)absNum;
-    float fracPart = absNum - intPart;
-    printf("Binary of %f = ", absNum);
-    printBinaryInteger(intPart);
-    if (fracPart > 0) {
-        printf(".");
-        printBinaryFraction(fracPart, 23);
+
+void convert_frac_to_binary(double num, int start){
+    int i=start;
+    while (i<23)
+    {
+        double temp = num*2;
+        mantissa[i++] = (int)temp;
+        num = temp - (int)temp;
+    }
+}
+
+void fill_mantissa(int arr[], int end){
+    for(int i=0; i<end; i++){
+        mantissa[i] = arr[i+1];
+    }
+}
+
+void fill_exponent(int exp){
+    int num = 127 + exp;
+    convert_int_to_binary(num, exponent, 8);
+}
+
+void ieee(int num, double frac){
+    int size_of_num = bit_size(num);
+    int exp = size_of_num-1;        //actual exponent
+    int num_array[32];
+    convert_int_to_binary(num, num_array, size_of_num);
+    convert_frac_to_binary(frac, exp);
+    fill_mantissa(num_array, exp);
+    fill_exponent(exp);
+
+    (num>0)?(printf("Sign: 0\n")):(printf("Sign: 1\n"));
+    printf("Exponent: ");
+    for(int i=0; i<8; i++){
+        printf("%d", exponent[i]);
+    }
+    printf("\nMantissa: ");
+    for(int i=0; i<27; i++){
+        printf("%d", mantissa[i]);
     }
     printf("\n");
-    float frac = absNum;
-    int exponent = 0;
-    if (frac >= 2.0) {
-        while (frac >= 2.0) {
-            frac /= 2.0;
-            exponent++;
-        }
-    } else if (frac < 1.0 && frac != 0.0) {
-        while (frac < 1.0) {
-            frac *= 2.0;
-            exponent--;
-        }
-    }
-    int biasedExp = exponent + 127;
-    frac -= 1.0;
-    unsigned int mantissa = 0;
-    for (int i = 0; i < 23; i++) {
-        frac *= 2;
-        if (frac >= 1.0) {
-            mantissa |= (1 << (22 - i));
-            frac -= 1.0;
-        }
-    }
-    unsigned int ieee754 = (sign << 31) | (biasedExp << 23) | mantissa;
-    printf("\n Detailed Components:\n");
-    printf("Sign bit     : %d\n", sign);
-    printf("Exponent     : %d (biased) = ", biasedExp);
-    for (int i = 7; i >= 0; i--) printf("%d", (biasedExp >> i) & 1);
-    printf("\nMantissa     : ");
-    for (int i = 22; i >= 0; i--) printf("%d", (mantissa >> i) & 1);
-    printf("\n");
-     printf("\n IEEE 754 Representation:\n");
-    for (int i = 31; i >= 0; i--) {
-        printf("%d", (ieee754 >> i) & 1);
-        if (i == 31 || i == 23) printf(" ");
-    }
-    printf("\n");
+}
+
+int main(){
+    double num;
+    printf("Enter the number: ");
+    scanf("%lf", &num);
+    int integer = (int)num;
+    double fraction = num - integer;
+    ieee(integer, fraction);
     return 0;
 }
