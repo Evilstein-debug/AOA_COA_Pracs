@@ -1,24 +1,19 @@
 #include <stdio.h>
 
-int max(int a, int b)
-{
+int max(int a, int b) {
     return (a > b) ? a : b;
 }
 
-void knapsack(int n, int W, int value[], int weight[])
-{
-    int dp[20][20];
+void knapsack(int n, int W, int value[], int weight[]) {
+    int dp[n + 1][W + 1];
 
-    for (int i = 0; i <= n; i++)
-    {
-        for (int w = 0; w <= W; w++)
-        {
-            if (w == 0)
-                dp[i][w] = 0;
-            else if (weight[i - 1] <= w)
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= W; w++) {
+            if (i == 0 || w == 0) dp[i][w] = 0;
+            else if (weight[i - 1] <= w){
                 dp[i][w] = max(dp[i - 1][w], value[i - 1] + dp[i - 1][w - weight[i - 1]]);
-            else
-                dp[i][w] = dp[i - 1][w];
+            }
+            else dp[i][w] = dp[i - 1][w];
         }
     }
 
@@ -26,10 +21,8 @@ void knapsack(int n, int W, int value[], int weight[])
 
     printf("Selected items: ");
     int w = W;
-    for (int i = n; i > 0 && dp[i][w] != 0; i--)
-    {
-        if (dp[i][w] != dp[i - 1][w])
-        {
+    for (int i = n; i > 0 && dp[i][w] > 0; i--) {
+        if (dp[i][w] != dp[i - 1][w]) {
             printf("%d ", i);
             w -= weight[i - 1];
         }
@@ -37,8 +30,7 @@ void knapsack(int n, int W, int value[], int weight[])
     printf("\n");
 }
 
-int main()
-{
+int main() {
     int n, W;
 
     printf("Enter number of items: ");
@@ -49,8 +41,7 @@ int main()
     int value[20], weight[20];
 
     printf("Enter values and weights of items:\n");
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         printf("Item %d - Value Weight: ", i + 1);
         scanf("%d %d", &value[i], &weight[i]);
     }
